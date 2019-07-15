@@ -15,22 +15,22 @@ from lib.action_dataset import Action_Dataset
 from lib.action_dataset import split_data
 
 
-_BATCH_SIZE = 6
-_CLIP_SIZE = 64
+_BATCH_SIZE = 4
+_CLIP_SIZE = 16
 # How many frames are used for each video in testing phase
-_EACH_VIDEO_TEST_SIZE = 250
+_EACH_VIDEO_TEST_SIZE = 16
 _FRAME_SIZE = 224
 _LEARNING_RATE = 0.001
-_GLOBAL_EPOCH = 40
-_PREFETCH_BUFFER_SIZE = 30
-_NUM_PARALLEL_CALLS = 10
+_GLOBAL_EPOCH = 1000
+_PREFETCH_BUFFER_SIZE = 100
+_NUM_PARALLEL_CALLS = 2
 _SAVER_MAX_TO_KEEP = 10
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
 _MOMENTUM = 0.9
 _DROPOUT = 0.36
 _OUTPUT_STEP = 20
 # When the accuracy on training data higher than this value, run testing phase
-_RUN_TEST_THRESH = 0.85
+_RUN_TEST_THRESH = 0.80
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.75
 _LOG_ROOT = 'output'
@@ -40,19 +40,26 @@ _CHECKPOINT_PATHS = {
     'flow': './data/checkpoints/flow_scratch/model.ckpt',
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
+    # 'bw_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
+    'bw': './data/checkpoints/bw_scratch/TCL_bw_0.831_model-44322',
+
+
 }
 
 _CHANNEL = {
     'rgb': 3,
     'flow': 2,
+    'bw': 1,
 }
 
 _SCOPE = {
     'rgb': 'RGB',
     'flow': 'Flow',
+    'bw': 'BW',
 }
 
 _CLASS_NUM = {
+    'TCL': 14,
     'ucf101': 101,
     'hmdb51': 51
 }
@@ -73,13 +80,17 @@ def process_video(data_info, name, mode, is_training=True):
     else:
         clip_seq, label_seq = data.next_batch(
             1, _EACH_VIDEO_TEST_SIZE+1, shuffle=False, data_augment=False)
+
+    # print("input: ", label_seq.shape)
+    clip_seq = np.expand_dims(clip_seq, axis=-1)
+    # print("input: ", clip_seq.shape)
     clip_seq = 2*(clip_seq/255) - 1
     clip_seq = np.array(clip_seq, dtype='float32')
     return clip_seq, label_seq
 
 
 def main(dataset='ucf101', mode='rgb', split=1):
-    assert mode in ['rgb', 'flow'], 'Only RGB data and flow data is supported'
+    assert mode in ['rgb', 'flow', 'bw'], 'Only RGB data and flow data is supported'
     log_dir = os.path.join(_LOG_ROOT, 'finetune-%s-%s-%d' %
                            (dataset, mode, split))
     if not os.path.exists(log_dir):
@@ -90,7 +101,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
     ##  Data Preload  ###
     train_info, test_info = split_data(
         os.path.join('./data', dataset, mode+'.txt'),
-        os.path.join('./data', dataset, 'testlist%02d' % split+'.txt'))
+        os.path.join('./data', dataset, 'val.txt'))
 #        os.path.join('/data1/yunfeng/i3d_test/data', dataset, mode+'.txt'),
 #        os.path.join('/data1/yunfeng/i3d_test/data', dataset, 'testlist%02d' % split+'.txt'))
     train_data = Action_Dataset(dataset, mode, train_info)
@@ -191,7 +202,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
     global_index = tf.Variable(0, trainable=False)
 
     # Set learning rate schedule by hand, also you can use an auto way
-    boundaries = [10000, 20000, 30000, 40000, 50000]
+    boundaries = [10000, 200000, 30000, 40000, 50000]
     values = [_LEARNING_RATE, 0.0008, 0.0005, 0.0003, 0.0001, 5e-5]
     learning_rate = tf.train.piecewise_constant(
         global_index, boundaries, values)
@@ -208,10 +219,10 @@ def main(dataset='ucf101', mode='rgb', split=1):
     train_writer = tf.summary.FileWriter(log_dir, sess.graph)
     sess.run(tf.global_variables_initializer())
     sess.run(train_init_op)
-    saver.restore(sess, _CHECKPOINT_PATHS[train_data.mode+'_imagenet'])
+    saver.restore(sess, _CHECKPOINT_PATHS[train_data.mode])
 
     print('----Here we start!----')
-    print('Output wirtes to ' + log_dir)
+    # print('Output wirtes to ' + log_dir)
     # logging.info('----Here we start!----')
     step = 0
     # for one epoch

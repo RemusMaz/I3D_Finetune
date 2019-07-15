@@ -20,6 +20,8 @@ class Video(object):
 
     def load_img(self, index):
         img_dir = self.path
+        if self.tag == 'bw':
+            return [Image.open(os.path.join(img_dir, self.img_format.format(index, '')))]
         if self.tag == 'rgb':
             return [Image.open(os.path.join(img_dir, self.img_format.format(index, ''))).convert('RGB')]
         elif self.tag == 'flow':
@@ -47,6 +49,9 @@ class Video3D(Video):
             frames.extend(self.load_img(i % self.total_frame_num + 1))
         frames = transform_data(frames, crop_size=side_length, random_crop=data_augment, random_flip=data_augment)
         frames_np = []
+        if self.tag == 'bw':
+            for img in frames:
+                frames_np.append(np.asarray(img))
         if self.tag == 'rgb':
             for img in frames:
                 frames_np.append(np.asarray(img))

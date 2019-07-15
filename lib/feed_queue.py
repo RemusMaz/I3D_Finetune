@@ -1,5 +1,5 @@
 import multiprocessing as mp
-import queue
+import Queue as queue
 import threading
 
 

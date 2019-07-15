@@ -1,0 +1,14 @@
+Drinking_some_water
+Falls_from_bed
+Falls_from_standing
+Getting_off_a_bed
+Jogging
+Lying_down
+Lying_still
+Moving_on_a_chair
+Object_picking
+Sitting_down
+Sitting_on_a_bed
+Standing_still
+Standing_up
+Walking

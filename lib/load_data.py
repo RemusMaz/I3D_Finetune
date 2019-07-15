@@ -3,18 +3,20 @@ import pandas as pd
 
 
 _CLASS_NUM = {
+    'TCL': 14,
     'ucf101': 101,
     'hmdb51': 51,
 }
 
 _IMG_FORMAT = {
+    'TCL': 'frame{:06d}{:s}.jpg',
     'ucf101': 'frame{:06d}{:s}.jpg',
     'hmdb51': 'frame{:06d}{:s}.jpg',
 }
 
 
 def load_info(name, root, task='train', mode='rgb', split=1):
-    if name in ['ucf101', 'hmdb51']:
+    if name in ['ucf101', 'hmdb51', 'TCL']:
         train_info, val_info = get_info(name, root, mode, split)
         return train_info, val_info, _CLASS_NUM[name], _IMG_FORMAT[name]
     else:
@@ -25,17 +27,18 @@ def get_info(name, root, mode='rgb', split=1):
     base_dir = root
     # data_dir = 'data/'name+'/'+mode+'.txt'
     #test_split = 'data/'+name+'/testlist%02d' % split+'.txt'
-    data_dir = '/data1/yunfeng/i3d_test/data/'+name+'/'+mode+'.txt'
-    test_split = '/data1/yunfeng/i3d_test/data/'+name+'/testlist%02d' % split+'.txt'
+    data_dir = './data/'+name+'/'+mode+'.txt'
+    test_split = './data/'+name+'/testsplit%02d' % split+'.txt'
     f_1 = open(data_dir, 'r')
-    test = [x.split('/')[1].split('.')[0]
-            for x in open(test_split, 'r').readlines()]
+    test = [x.strip() for x in open(test_split, 'r').readlines()]
     train_info = []
     test_info = []
     for line in f_1.readlines():
         line = line.strip().split(' ')
+        line[0] = line[1].split("/")[-2:]
+        line[0] = line[0][0] + "/" + line[0][1]
         info = {'name': line[0],
-                'path': os.path.join(base_dir[mode], line[1]),
+                'path': os.path.join(line[1]),
                 'length': int(line[2]),
                 'label': int(line[3])}
         if line[0] in test:
@@ -53,8 +56,7 @@ class UCF101():
         data_dir = 'data/ucf101/'+mode+'.txt'
         test_split = 'data/ucf101/testlist%02d' % split+'1.txt'
         f_1 = open(data_dir, 'r')
-        test = [x.split('/')[1].split('.')[0]
-                for x in open(test_split, 'r').readlines()]
+        test = [x for x in open(test_split, 'r').readlines()]
         train_info = []
         test_info = []
         for line in f_1.readlines():

@@ -39,6 +39,7 @@ class Action_Dataset:
                     self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment))
                 label.append(self.videos[self.perm[i]].label)
         else:
+
             for i in range(start, end):
                 batch.append(
                     self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment))
@@ -54,17 +55,19 @@ def split_data(data_info, test_split):
     test_info = list()
     # extract the specific video name,and plus a document name behind,the result is such v_ApplyEyeMakeup_g01_c01
     for line in f2.readlines():
-        test.append(line.split('/')[1].split('.')[0])
+        test.append(line.strip())
 
     # if rgb's doc name is in testlist,then append in test_info,if not, append in train
     # for example, info is
     # v_ApplyEyeMakeup_g01_c01,/data4/zhouhao/dataset/ucf101/jpegs_256/v_ApplyEyeMakeup_g01_c01,165,0
     for line in f1.readlines():
-        info = line.strip().split(' ')
-        if info[0] in test:
-            test_info.append(info)
+        info = line.strip().split(' ')[1]
+        info = info.split("/")[-2:]
+        info = info[0] + "/" + info[1]
+        if info in test:
+            test_info.append(line.strip().split(" "))
         else:
-            train_info.append(info)
+            train_info.append(line.strip().split(" "))
     f1.close()
     f2.close()
     return train_info, test_info
