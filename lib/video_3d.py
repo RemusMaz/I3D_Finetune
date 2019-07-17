@@ -70,7 +70,7 @@ class Video_3D:
             read_path = os.path.join(img_dir, self.img_format.format(index, ''))
             # print(read_path)
             if os.path.exists(read_path):
-                img = Image.open(read_path)
+                img = Image.open(read_path).convert('RGB')
             else:
                 return []
 

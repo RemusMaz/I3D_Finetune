@@ -13,16 +13,16 @@ import tensorflow as tf
 import i3d
 from lib.action_dataset import Action_Dataset
 from lib.action_dataset import split_data
-
+np.set_printoptions(threshold=np.nan)
 
 _BATCH_SIZE = 4
-_CLIP_SIZE = 16
+_CLIP_SIZE = 64
 # How many frames are used for each video in testing phase
-_EACH_VIDEO_TEST_SIZE = 16
+_EACH_VIDEO_TEST_SIZE = 250
 _FRAME_SIZE = 224
 _LEARNING_RATE = 0.001
 _GLOBAL_EPOCH = 1000
-_PREFETCH_BUFFER_SIZE = 100
+_PREFETCH_BUFFER_SIZE = 30
 _NUM_PARALLEL_CALLS = 2
 _SAVER_MAX_TO_KEEP = 10
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
@@ -30,10 +30,10 @@ _MOMENTUM = 0.9
 _DROPOUT = 0.36
 _OUTPUT_STEP = 20
 # When the accuracy on training data higher than this value, run testing phase
-_RUN_TEST_THRESH = 0.80
+_RUN_TEST_THRESH = 0.75
 # If the accuracy on testing data higher than this value, save the model
-_SAVE_MODEL_THRESH = 0.75
-_LOG_ROOT = 'output'
+_SAVE_MODEL_THRESH = 0.70
+_LOG_ROOT = 'imagenet_TCL'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -41,7 +41,7 @@ _CHECKPOINT_PATHS = {
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
     # 'bw_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
-    'bw': './data/checkpoints/bw_scratch/TCL_bw_0.831_model-44322',
+    'bw': './data/checkpoints/bw_scratch/TCL_bw_0.902_model-25647',
 
 
 }
@@ -82,7 +82,7 @@ def process_video(data_info, name, mode, is_training=True):
             1, _EACH_VIDEO_TEST_SIZE+1, shuffle=False, data_augment=False)
 
     # print("input: ", label_seq.shape)
-    clip_seq = np.expand_dims(clip_seq, axis=-1)
+    # clip_seq = np.expand_dims(clip_seq, axis=-1)
     # print("input: ", clip_seq.shape)
     clip_seq = 2*(clip_seq/255) - 1
     clip_seq = np.array(clip_seq, dtype='float32')
@@ -148,6 +148,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
     test_init_op = iterator.make_initializer(test_dataset)
 
     clip_holder, label_holder = iterator.get_next()
+    # label_holder = tf.Print(label_holder, [label_holder], message="labels: ")
     clip_holder = tf.squeeze(clip_holder,  [1])
     label_holder = tf.squeeze(label_holder, [1])
     clip_holder.set_shape(
@@ -169,9 +170,12 @@ def main(dataset='ucf101', mode='rgb', split=1):
         # To change 400 classes to the ucf101 or hdmb classes
         fc_out = tf.layers.dense(
             logits_dropout, _CLASS_NUM[dataset], use_bias=True)
+
         # compute the top-k results for the whole batch size
         is_in_top_1_op = tf.nn.in_top_k(fc_out, label_holder, 1)
 
+    # test_max = tf.argmax(fc_out, axis=-1)
+    # test_max = tf.Print(test_max, [test_max], message="Argmax, fc_out: ")
     # Loss calculation, including L2-norm
     variable_map = {}
     train_var = []
@@ -190,8 +194,8 @@ def main(dataset='ucf101', mode='rgb', split=1):
     tf.summary.scalar('loss_weight', loss_weight)
     tf.summary.scalar('total_loss', total_loss)
 
-    # Import Pre-trainned model
     saver = tf.train.Saver(var_list=variable_map, reshape=True)
+    # saver = tf.train.Saver(reshape=True)
     saver2 = tf.train.Saver(max_to_keep=_SAVER_MAX_TO_KEEP)
     # Specific Hyperparams
     # steps for training: the number of steps on batch per epoch
@@ -202,7 +206,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
     global_index = tf.Variable(0, trainable=False)
 
     # Set learning rate schedule by hand, also you can use an auto way
-    boundaries = [10000, 200000, 30000, 40000, 50000]
+    boundaries = [30000, 60000, 90000, 120000, 150000]
     values = [_LEARNING_RATE, 0.0008, 0.0005, 0.0003, 0.0001, 5e-5]
     learning_rate = tf.train.piecewise_constant(
         global_index, boundaries, values)
@@ -219,7 +223,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
     train_writer = tf.summary.FileWriter(log_dir, sess.graph)
     sess.run(tf.global_variables_initializer())
     sess.run(train_init_op)
-    saver.restore(sess, _CHECKPOINT_PATHS[train_data.mode])
+    saver.restore(sess, _CHECKPOINT_PATHS[train_data.mode + "_imagenet"])
 
     print('----Here we start!----')
     # print('Output wirtes to ' + log_dir)
@@ -239,6 +243,8 @@ def main(dataset='ucf101', mode='rgb', split=1):
             feed_dict={dropout_holder: _DROPOUT, is_train_holder: True})
         duration = time.time() - start_time
         tmp = np.sum(is_in_top_1)
+        # print("top_1: ", is_in_top_1)
+        # print("label: ", test_label)
         true_count += tmp
         tmp_count += tmp
         train_writer.add_summary(summary, step)

@@ -21,7 +21,7 @@ class Video(object):
     def load_img(self, index):
         img_dir = self.path
         if self.tag == 'bw':
-            return [Image.open(os.path.join(img_dir, self.img_format.format(index, '')))]
+            return [Image.open(os.path.join(img_dir, self.img_format.format(index, ''))).convert('RGB')]
         if self.tag == 'rgb':
             return [Image.open(os.path.join(img_dir, self.img_format.format(index, ''))).convert('RGB')]
         elif self.tag == 'flow':
@@ -45,7 +45,7 @@ class Video3D(Video):
         if random_start:
             start = np.random.randint(max(self.total_frame_num-(frame_num-1)*sample, 1))
         frames = []
-        for i in range(start, start+frame_num*sample, sample):
+        for i in range(start, start + frame_num * sample, sample):
             frames.extend(self.load_img(i % self.total_frame_num + 1))
         frames = transform_data(frames, crop_size=side_length, random_crop=data_augment, random_flip=data_augment)
         frames_np = []
