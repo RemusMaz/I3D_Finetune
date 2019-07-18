@@ -33,12 +33,13 @@ _OUTPUT_STEP = 20
 _RUN_TEST_THRESH = 0.75
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.70
-_LOG_ROOT = 'imagenet_TCL'
+_LOG_ROOT = 'kin_TCL'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
     'flow': './data/checkpoints/flow_scratch/model.ckpt',
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
+    'rgb_kinetics': './data/checkpoints/rgb_scratch_kin600/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
     # 'bw_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'bw': './data/checkpoints/bw_scratch/TCL_bw_0.902_model-25647',
@@ -161,7 +162,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
     with tf.variable_scope(_SCOPE[train_data.mode]):
         # insert i3d model
         model = i3d.InceptionI3d(
-            400, spatial_squeeze=True, final_endpoint='Logits')
+            600, spatial_squeeze=True, final_endpoint='Logits')
         # the line below outputs the final results with logits
         # __call__ uses _template, and _template uses _build when defined
         logits, _ = model(clip_holder, is_training=is_train_holder,
@@ -181,8 +182,9 @@ def main(dataset='ucf101', mode='rgb', split=1):
     train_var = []
     for variable in tf.global_variables():
         tmp = variable.name.split('/')
-        if tmp[0] == _SCOPE[train_data.mode] and 'dense' not in tmp[1]:
-            variable_map[variable.name.replace(':0', '')] = variable
+        if tmp[0] == _SCOPE[train_data.mode] and 'dense' not in tmp[1] :
+            var_name = "/".join(variable.name.replace(':0', '').split("/")[2:])
+            variable_map[var_name] = variable
         if tmp[-1] == 'w:0' or tmp[-1] == 'kernel:0':
             weight_l2 = tf.nn.l2_loss(variable)
             tf.add_to_collection('weight_l2', weight_l2)
@@ -193,6 +195,9 @@ def main(dataset='ucf101', mode='rgb', split=1):
     tf.summary.scalar('loss', loss)
     tf.summary.scalar('loss_weight', loss_weight)
     tf.summary.scalar('total_loss', total_loss)
+
+    ckpt_reader = tf.train.NewCheckpointReader(_CHECKPOINT_PATHS[train_data.mode + "_kinetics"])
+    ckpt_vars_to_shape_map = ckpt_reader.get_variable_to_shape_map()
 
     saver = tf.train.Saver(var_list=variable_map, reshape=True)
     # saver = tf.train.Saver(reshape=True)
@@ -223,7 +228,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
     train_writer = tf.summary.FileWriter(log_dir, sess.graph)
     sess.run(tf.global_variables_initializer())
     sess.run(train_init_op)
-    saver.restore(sess, _CHECKPOINT_PATHS[train_data.mode + "_imagenet"])
+    saver.restore(sess, _CHECKPOINT_PATHS[train_data.mode + "_kinetics"])
 
     print('----Here we start!----')
     # print('Output wirtes to ' + log_dir)
@@ -286,7 +291,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
                              (train_data.epoch_completed, accuracy))
                 # saving the best params in test set
                 if accuracy > _SAVE_MODEL_THRESH:
-                    if accuracy > accuracy_tmp:
+                    if accuracy >= accuracy_tmp:
                         accuracy_tmp = accuracy
                         saver2.save(sess, os.path.join(log_dir,
                                                        test_data.name+'_'+train_data.mode +
