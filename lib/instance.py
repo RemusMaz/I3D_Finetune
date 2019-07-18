@@ -21,7 +21,7 @@ class Video(object):
     def load_img(self, index):
         img_dir = self.path
         if self.tag == 'bw':
-            return [Image.open(os.path.join(img_dir, self.img_format.format(index, ''))).convert('RGB')]
+            return [Image.open(os.path.join(img_dir, self.img_format.format(index, '')))]
         if self.tag == 'rgb':
             return [Image.open(os.path.join(img_dir, self.img_format.format(index, ''))).convert('RGB')]
         elif self.tag == 'flow':

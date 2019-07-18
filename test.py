@@ -19,7 +19,7 @@ from lib.label_trans import *
 
 _FRAME_SIZE = 224
 _QUEUE_SIZE = 20
-_QUEUE_PROCESS_NUM = 2
+_QUEUE_PROCESS_NUM = 1
 _MIX_WEIGHT_OF_RGB = 0.5
 _MIX_WEIGHT_OF_FLOW = 0.5
 _LOG_ROOT = 'output'
@@ -77,7 +77,7 @@ def main(dataset, mode, split):
         os.mkdir(log_dir)
 
     logging.basicConfig(level=logging.INFO, filename=os.path.join(
-        log_dir, 'log-%s-%d' % (mode, split)+'.txt'), filemode='w', format='%(message)s')
+        log_dir, 'log-%s-%d' % (mode, split) + '.txt'), filemode='w', format='%(message)s')
 
     label_map = get_label_map(os.path.join(
         './data', dataset, 'label_map.txt'))
@@ -89,6 +89,9 @@ def main(dataset, mode, split):
             dataset, root=_DATA_ROOT[dataset], mode='rgb', split=split)
     # _, test_info_flow, _, _ = load_info(
     #     dataset, root=_DATA_ROOT[dataset], mode='flow', split=split)
+
+    all_file = open("allVideo.txt", "w")
+    wrong_file = open("wrongVideo.txt", "w")
 
     label_holder = tf.placeholder(tf.int32, [None])
 
@@ -105,11 +108,11 @@ def main(dataset, mode, split):
             tf.float32, [None, None, _FRAME_SIZE, _FRAME_SIZE, _CHANNEL['rgb']])
         info_rgb, _ = rgb_data.gen_test_list()
     # if mode in ['flow', 'mixed']:
-        # flow_data = ActionDataset(
-        #     dataset, class_num, test_info_flow, 'frame{:06d}{:s}.jpg', mode='flow')
-        # flow_holder = tf.placeholder(
-        #     tf.float32, [None, None, _FRAME_SIZE, _FRAME_SIZE, _CHANNEL['flow']])
-        # info_flow, _ = flow_data.gen_test_list()
+    # flow_data = ActionDataset(
+    #     dataset, class_num, test_info_flow, 'frame{:06d}{:s}.jpg', mode='flow')
+    # flow_holder = tf.placeholder(
+    #     tf.float32, [None, None, _FRAME_SIZE, _FRAME_SIZE, _CHANNEL['flow']])
+    # info_flow, _ = flow_data.gen_test_list()
 
     # insert the model
     if mode in ['bw']:
@@ -122,7 +125,6 @@ def main(dataset, mode, split):
             bw_fc_out = tf.layers.dense(
                 bw_logits_dropout, _CLASS_NUM[dataset], use_bias=True)
             bw_top_1_op = tf.nn.in_top_k(bw_fc_out, label_holder, 1)
-
 
     if mode in ['rgb', 'mixed']:
         with tf.variable_scope(_SCOPE['rgb']):
@@ -147,7 +149,7 @@ def main(dataset, mode, split):
 
     # construct two separate feature map and saver(rgb_saver,flow_saver)
 
-        # bw_saver = tf.train.Saver(reshape=True)
+    # bw_saver = tf.train.Saver(reshape=True)
     variable_map = {}
     if mode in ['rgb', 'mixed']:
         for variable in tf.global_variables():
@@ -209,7 +211,7 @@ def main(dataset, mode, split):
         # Start Queue
         bw_queue = FeedQueue(queue_size=_QUEUE_SIZE)
         bw_queue.start_queue(bw_data.get_video, args=info_bw,
-                              process_num=_QUEUE_PROCESS_NUM)
+                             process_num=_QUEUE_PROCESS_NUM)
     if mode in ['rgb', 'mixed']:
         # Start Queue
         rgb_queue = FeedQueue(queue_size=_QUEUE_SIZE)
@@ -222,11 +224,13 @@ def main(dataset, mode, split):
 
     # Here we start the test procedure
     print('----Here we start!----')
-    print('Output wirtes to '+ log_dir)
+    print('Output wirtes to ' + log_dir)
     true_count = 0
-    video_size = len(test_info_rgb)
+    true_count2 = 0
+    # video_size = len(test_info_rgb)
+    video_size = len(test_info_bw)
     error_record = open(os.path.join(
-        log_dir, 'error_record_'+mode+'.txt'), 'w')
+        log_dir, 'error_record_' + mode + '.txt'), 'w')
     bw_fc_data = np.zeros((video_size, _CLASS_NUM[dataset]))
     rgb_fc_data = np.zeros((video_size, _CLASS_NUM[dataset]))
     flow_fc_data = np.zeros((video_size, _CLASS_NUM[dataset]))
@@ -238,13 +242,13 @@ def main(dataset, mode, split):
         # print(i)
         if mode in ['bw']:
             bw_clip, label = bw_queue.feed_me()
-            bw_clip = 2*(bw_clip/255) - 1
+            bw_clip = 2 * (bw_clip / 255) - 1
             bw_clip = np.expand_dims(bw_clip, axis=-1)
             input_bw = bw_clip[np.newaxis, :, :, :, :]
             video_name = bw_data.videos[i].name
         if mode in ['rgb', 'mixed']:
             rgb_clip, label = rgb_queue.feed_me()
-            rgb_clip = 2*(rgb_clip/255) - 1
+            rgb_clip = 2 * (rgb_clip / 255) - 1
             input_rgb = rgb_clip[np.newaxis, :, :, :, :]
             video_name = rgb_data.videos[i].name
         # if mode in ['flow', 'mixed']:
@@ -270,8 +274,6 @@ def main(dataset, mode, split):
         if i > 10:
             inference_time.append(stop - start)
 
-
-
         # if mode in ['flow']:
         #     top_1, predictions, curr_flow_fc_data = sess.run(
         #         [top_k_op, fc_out, flow_fc_out],
@@ -292,26 +294,31 @@ def main(dataset, mode, split):
 
         tmp = np.sum(top_1)
         true_count += tmp
+        true_count2 += tmp
         print('Video %d: %d, accuracy: %.4f (%d/%d), name: %s' %
-              (i+1, tmp, true_count/video_size, true_count, video_size, video_name))
+              (i + 1, tmp, true_count / video_size, true_count, video_size, video_name))
+        all_file.write('Video %d: %d, (%d/%d), name: %s\n' %
+              (i + 1, tmp, true_count, video_size, video_name))
         logging.info('Video%d: %d, accuracy: %.4f (%d/%d) , name:%s' %
-                     (i+1, tmp, true_count/video_size, true_count, video_size, video_name))
+                     (i + 1, tmp, true_count / video_size, true_count, video_size, video_name))
 
         # self_added
-#        print(predictions[0, np.argmax(predictions, axis=1)[0]])
-#        print(trans_label(np.argmax(predictions, axis=1)[0], label_map))
+        #        print(predictions[0, np.argmax(predictions, axis=1)[0]])
+        #        print(trans_label(np.argmax(predictions, axis=1)[0], label_map))
         # print(np.argmax(label))
-        #print(trans_label(np.argmax(label), label_map))
+        # print(trans_label(np.argmax(label), label_map))
 
         if tmp == 0:
             wrong_answer = np.argmax(predictions, axis=1)[0]
+            print('---->answer: %s, probability: %.2f' %
+                  (trans_label(wrong_answer, label_map), predictions[0, wrong_answer]))
+            wrong_file.write('Video %d: name: %s---->answer: %s, probability: %.2f\n' %
+                           (i + 1, video_name, trans_label(wrong_answer, label_map), predictions[0, wrong_answer]))
             # Attention: the graph output are converted into the type of numpy.array
-            if "Falls" in label_map[wrong_answer] and "Falls" not in label_map[input_label[0]]:
+            if not (("Falls" in label_map[wrong_answer] and "Falls" not in label_map[input_label[0]]) or (
+                    "Falls" in label_map[input_label[0]] and "Falls" not in label_map[wrong_answer])):
+                true_count2 += 1
 
-                print('---->answer: %s, probability: %.2f' %
-                    (trans_label(wrong_answer, label_map), predictions[0, wrong_answer]))
-            else:
-                true_count += 1
             logging.info('---->answer: %s, probability: %.2f' %
                          (trans_label(wrong_answer, label_map), predictions[0, wrong_answer]))
             error_record.write(
@@ -324,7 +331,9 @@ def main(dataset, mode, split):
 
     error_record.close()
     accuracy = true_count / video_size
+    accuracy2 = true_count2 / video_size
     print('test accuracy: %.4f' % (accuracy))
+    print('test accuracy: %.4f' % (accuracy2))
     logging.info('test accuracy: %.4f' % (accuracy))
     if mode in ['bw']:
         np.save(os.path.join(log_dir, 'obj_{}_bw_fc_{}.npy').format(
