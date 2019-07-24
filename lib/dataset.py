@@ -47,7 +47,7 @@ class ActionDataset(Dataset):
         test_list = []
         name = []
         for i, video in enumerate(self.videos):
-            test_list.append(([i, 251, 1, sample, False, False],))
+            test_list.append(([i, 16, 1, sample, False, False],))
             # test_list.append(([i, 251, 1, sample, False, False],))
             name.append(video.name)
         return test_list, name

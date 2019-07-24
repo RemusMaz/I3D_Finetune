@@ -76,12 +76,6 @@ def dense_flow(augs):
     video_name = video_name.split('/')[1]
     video_path = os.path.join(videos_root, folder, video_name)
 
-    # provide two video-read methods: cv2.VideoCapture() and skvideo.io.vread(), both of which need ffmpeg support
-
-    # videocapture=cv2.VideoCapture(video_path)
-    # if not videocapture.isOpened():
-    #     print 'Could not initialize capturing! ', video_name
-    #     exit()
     try:
         videocapture = skvideo.io.vread(video_path)
     except:
@@ -130,6 +124,8 @@ def dense_flow(augs):
         if color is False:
             image = gray
 
+        # image is the frame o be saved
+
         save_flows(flowDTVL1, image, save_dir, frame_num, video_name, bound)  # this is to save flows and img.
         prev_gray = gray
         prev_image = image
@@ -156,14 +152,14 @@ def get_video_list():
 def parse_args():
     parser = argparse.ArgumentParser(description="densely extract the video frames and optical flows")
     parser.add_argument('--dataset', default='TCL', type=str, help='set the dataset name, to find the data path')
-    parser.add_argument('--data_root', default='/media/remus/datasets/TCL_Fall_Detection/avi', type=str)
+    parser.add_argument('--data_root', default='/media/remus/datasets/Fall_detection/Coffee_room_1', type=str)
     parser.add_argument('--new_dir_flow', default='flows', type=str)
     parser.add_argument('--new_dir_rgb', default='frames', type=str)
     parser.add_argument('--num_workers', default=2, type=int, help='num of workers to act multi-process')
-    parser.add_argument('--step', default=2, type=int, help='gap frames')
+    parser.add_argument('--step', default=1, type=int, help='gap frames')
     parser.add_argument('--bound', default=15, type=int, help='set the maximum of optical flow')
-    parser.add_argument('--s_', default=0, type=int, help='start id')
-    parser.add_argument('--e_', default=1251, type=int, help='end id')
+    # parser.add_argument('--s_', default=0, type=int, help='start id')
+    # parser.add_argument('--e_', default=1251, type=int, help='end id')
     parser.add_argument('--mode', default='run', type=str, help='set \'run\' if debug done, otherwise, set debug')
     parser.add_argument('--color', default=False, type=bool, help='if frames ar rgb')
 
@@ -180,20 +176,20 @@ if __name__ == '__main__':
 
     args = parse_args()
     data_root = os.path.join(args.data_root)
-    videos_root = os.path.join(data_root, "avi")
+    videos_root = os.path.join(data_root, "Videos")
     # specify the augments
     num_workers = args.num_workers
     step = args.step
     bound = args.bound
     color = args.color
-    s_ = args.s_
-    e_ = args.e_
+    # s_ = args.s_
+    # e_ = args.e_
     new_dir_flow = args.new_dir_flow
     new_dir_rgb = args.new_dir_rgb
     mode = args.mode
     # get video list
     video_list, len_videos = get_video_list()
-    video_list = video_list[s_:e_]
+    # video_list = video_list[s_:e_]
 
     print 'find {} videos.'.format(len_videos)
     flows_dirs = [video.split('.')[0].split("/")[0] for video in video_list]

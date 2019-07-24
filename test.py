@@ -40,13 +40,11 @@ _DATA_ROOT = {
 # NOTE: Before running, change the path of checkpoints
 
 _CHECKPOINT_PATHS = {
-    'rgb': './data/checkpoints/bw3_kin/TCL_rgb_0.988_model-48555',
-    # 'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
+    # 'rgb': './data/checkpoints/bw3_kin/TCL_rgb_0.988_model-48555',
+    'rgb': './data/checkpoints/bw_imagenet/TCL_rgb_0.980_model-38595',
     'flow': './data/checkpoints/flow_scratch/model.ckpt',
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
-    # 'bw_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
-    # 'bw': './data/checkpoints/bw_scratch/TCL_bw_0.902_model-25647',
     'bw': './data/checkpoints/bw_scratch/TCL_bw_0.882_model-1743',
 
 }
@@ -89,7 +87,8 @@ def main(dataset, mode, split):
             dataset, root=_DATA_ROOT[dataset], mode='rgb', split=split)
     # _, test_info_flow, _, _ = load_info(
     #     dataset, root=_DATA_ROOT[dataset], mode='flow', split=split)
-
+    all_file = open("allVideo.txt", "w")
+    wrong_file = open("wrongVideo.txt", "w")
     label_holder = tf.placeholder(tf.int32, [None])
 
     if mode in ['bw']:
@@ -126,7 +125,7 @@ def main(dataset, mode, split):
     if mode in ['rgb', 'mixed']:
         with tf.variable_scope(_SCOPE['rgb']):
             rgb_model = i3d.InceptionI3d(
-                600, spatial_squeeze=True, final_endpoint='Logits')
+                400, spatial_squeeze=True, final_endpoint='Logits')
             rgb_logits, _ = rgb_model(
                 rgb_holder, is_training=False, dropout_keep_prob=1)
             rgb_logits_dropout = tf.nn.dropout(rgb_logits, 1)
@@ -293,6 +292,8 @@ def main(dataset, mode, split):
         true_count2 += tmp
         print('Video %d: %d, accuracy: %.4f (%d/%d), name: %s' %
               (i + 1, tmp, true_count / video_size, true_count, video_size, video_name))
+        all_file.write('Video %d: %d, (%d/%d), name: %s\n' %
+                       (i + 1, tmp, true_count, video_size, video_name))
         logging.info('Video%d: %d, accuracy: %.4f (%d/%d) , name:%s' %
                      (i + 1, tmp, true_count / video_size, true_count, video_size, video_name))
 
@@ -306,13 +307,11 @@ def main(dataset, mode, split):
             wrong_answer = np.argmax(predictions, axis=1)[0]
             print('---->answer: %s, probability: %.2f' %
                   (trans_label(wrong_answer, label_map), predictions[0, wrong_answer]))
+            wrong_file.write('Video %d: name: %s---->answer: %s, probability: %.2f\n' %
+                             (i + 1, video_name, trans_label(wrong_answer, label_map), predictions[0, wrong_answer]))
             # Attention: the graph output are converted into the type of numpy.array
-            if ("Falls" in label_map[wrong_answer] and "Falls" not in label_map[input_label[0]]) or (
-                    "Falls" in label_map[input_label[0]] and "Falls" not in label_map[wrong_answer]):
-                print('---->answer: %s, probability: %.2f' %
-                      (trans_label(wrong_answer, label_map), predictions[0, wrong_answer]))
-
-            else:
+            if not (("Falls" in label_map[wrong_answer] and "Falls" not in label_map[input_label[0]]) or (
+                    "Falls" in label_map[input_label[0]] and "Falls" not in label_map[wrong_answer])):
                 true_count2 += 1
             logging.info('---->answer: %s, probability: %.2f' %
                          (trans_label(wrong_answer, label_map), predictions[0, wrong_answer]))
