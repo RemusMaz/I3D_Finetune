@@ -33,7 +33,7 @@ _OUTPUT_STEP = 20
 _RUN_TEST_THRESH = 0.75
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.70
-_LOG_ROOT = 'kin_TCL'
+_LOG_ROOT = 'kin_fall_detection_RGB_3set'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -60,6 +60,7 @@ _SCOPE = {
 }
 
 _CLASS_NUM = {
+    'Fall_detection': 2,
     'TCL': 14,
     'ucf101': 101,
     'hmdb51': 51

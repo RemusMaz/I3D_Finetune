@@ -23,13 +23,6 @@ if __name__ == '__main__':
             videocapture = skvideo.io.vread(video_path)
             print(video, len(videocapture))
 
-
             for i, frame in enumerate(videocapture):
-                filename = os.path.join(frame_folder, "frame_%04d.png" % i)
+                filename = os.path.join(frame_folder, "frame_%04d.png" % int(i + 1))
                 cv2.imwrite(filename, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-
-            # video_capture = cv2.VideoCapture(video_path)
-            # video_fps = video_capture.get(cv2.CAP_PROP_FPS)
-            # video_capture.release()
-            #
-            # os.system("ffmpeg -i '" + video_path + "' -vf \"fps=" + str(int(video_fps)) + "\" '" + os.path.join(frame_folder, "c01_%04d.jpeg") + "'")
