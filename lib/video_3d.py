@@ -12,7 +12,7 @@ from lib.data_augment import transform_data
 
 
 class Video_3D:
-    def __init__(self, info_list, tag='rgb', img_format='img_{:05d}{}.jpg'):
+    def __init__(self, info_list, tag='rgb', img_format='frame_{:04d}{}.png'):
         '''
             info_list: [name, path, total_frame, label]
             tag: 'rgb'(default) or 'flow'
@@ -22,13 +22,24 @@ class Video_3D:
         self.name = info_list[0]
         self.path = info_list[1]
         if isinstance(info_list[2], int):
-            self.total_frame_num = info_list[2]
+            self.start_frame = info_list[2]
         else:
-            self.total_frame_num = int(info_list[2])
+            self.start_frame = int(info_list[2])
+
         if isinstance(info_list[3], int):
-            self.label = info_list[3]
+            self.end_frame = info_list[3]
         else:
-            self.label = int(info_list[3])
+            self.end_frame = int(info_list[3])
+
+        if isinstance(info_list[2], int):
+            self.total_frame_num = info_list[3] - info_list[2] + 1
+        else:
+            self.total_frame_num = int(info_list[3]) - int(info_list[2]) + 1
+
+        if isinstance(info_list[4], int):
+            self.label = info_list[4]
+        else:
+            self.label = int(info_list[4])
         self.tag = tag
         # img_format offer the standard name of pic
         self.img_format = img_format
@@ -36,7 +47,8 @@ class Video_3D:
     def get_frames(self, frame_num, side_length=224, is_numpy=True, data_augment=False):
         # assert frame_num <= self.total_frame_num
         frames = list()
-        start = random.randint(1, max(self.total_frame_num - frame_num, 0) + 1)
+
+        start = self.start_frame + random.randint(0, max(self.total_frame_num - frame_num, 0))
         # combine all frames
         for i in range(start, start + frame_num):
             frames.extend(self.load_img((i - 1) % self.total_frame_num + 1))
@@ -77,6 +89,7 @@ class Video_3D:
             return [img]
         if self.tag == 'rgb':
             read_path = os.path.join(img_dir, self.img_format.format(index, ''))
+            # print(read_path)
             if os.path.exists(read_path):
                 img = Image.open(os.path.join(img_dir, self.img_format.format(index, ''))).convert('RGB')
             else:

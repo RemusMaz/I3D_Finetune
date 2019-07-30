@@ -61,9 +61,8 @@ def split_data(data_info, test_split):
     # for example, info is
     # v_ApplyEyeMakeup_g01_c01,/data4/zhouhao/dataset/ucf101/jpegs_256/v_ApplyEyeMakeup_g01_c01,165,0
     for line in f1.readlines():
-        info = line.strip().split(' ')[1]
-        info = info.split("/")[-2:]
-        info = info[0] + "/" + info[1]
+        info = line.strip()
+
         if info in test:
             test_info.append(line.strip().split(" "))
         else:
