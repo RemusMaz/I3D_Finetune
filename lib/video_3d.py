@@ -45,16 +45,16 @@ class Video_3D:
         self.img_format = img_format
 
     def get_frames(self, frame_num, side_length=224, is_numpy=True, data_augment=False):
-        # assert frame_num <= self.total_frame_num
         frames = list()
 
         start = self.start_frame + random.randint(0, max(self.total_frame_num - frame_num, 0))
         # combine all frames
+        # print(self.total_frame_num, self.path)
         for i in range(start, start + frame_num):
+            # print(self.img_format.format(i, ''))
+
             frames.extend(self.load_img((i - 1) % self.total_frame_num + 1))
 
-        # print("index out of size: ", self.path, self.total_frame_num)
-        # print(frames)
         if frames is []:
             return
         frames = transform_data(frames, crop_size=side_length, random_crop=data_augment, random_flip=data_augment)
@@ -80,7 +80,6 @@ class Video_3D:
         img_dir = self.path
         if self.tag == 'bw':
             read_path = os.path.join(img_dir, self.img_format.format(index, ''))
-            # print(read_path)
             if os.path.exists(read_path):
                 img = Image.open(read_path).convert('RGB')
             else:
@@ -89,7 +88,6 @@ class Video_3D:
             return [img]
         if self.tag == 'rgb':
             read_path = os.path.join(img_dir, self.img_format.format(index, ''))
-            # print(read_path)
             if os.path.exists(read_path):
                 img = Image.open(os.path.join(img_dir, self.img_format.format(index, ''))).convert('RGB')
             else:

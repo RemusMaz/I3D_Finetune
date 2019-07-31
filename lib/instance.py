@@ -13,7 +13,8 @@ class Video(object):
         '''
         self.name = info_dict['name']
         self.path = info_dict['path']
-        self.total_frame_num = info_dict['length']
+        self.total_frame_num = info_dict['end'] - info_dict['start'] + 1
+        self.start = info_dict['start']
         self.label = info_dict['label']
         self.img_format = img_format
         self.tag = tag
@@ -41,9 +42,9 @@ class Video3D(Video):
                 frame_num * height * width * channel (rgb:3 , flow:2) 
         '''
         #assert frame_num <= self.total_frame_num
-        start = start - 1
+        start = self.start
         if random_start:
-            start = np.random.randint(max(self.total_frame_num-(frame_num-1)*sample, 1))
+            start = start + np.random.randint(max(self.total_frame_num-(frame_num-1)*sample, 1))
         frames = []
         for i in range(start, start + frame_num * sample, sample):
             frames.extend(self.load_img(i % self.total_frame_num + 1))

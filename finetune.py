@@ -22,18 +22,18 @@ _EACH_VIDEO_TEST_SIZE = 250
 _FRAME_SIZE = 224
 _LEARNING_RATE = 0.001
 _GLOBAL_EPOCH = 1000
-_PREFETCH_BUFFER_SIZE = 30
-_NUM_PARALLEL_CALLS = 2
+_PREFETCH_BUFFER_SIZE = 32
+_NUM_PARALLEL_CALLS = 1
 _SAVER_MAX_TO_KEEP = 10
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
 _MOMENTUM = 0.9
 _DROPOUT = 0.36
-_OUTPUT_STEP = 20
+_OUTPUT_STEP = 10
 # When the accuracy on training data higher than this value, run testing phase
 _RUN_TEST_THRESH = 0.75
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.70
-_LOG_ROOT = 'kin_fall_detection_RGB_3set'
+_LOG_ROOT = 'kin_fall_detection_RGB_3set_proper_bExtended'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -212,7 +212,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
     global_index = tf.Variable(0, trainable=False)
 
     # Set learning rate schedule by hand, also you can use an auto way
-    boundaries = [30000, 60000, 90000, 120000, 150000]
+    boundaries = [5000, 10000, 15000, 20000, 25000]
     values = [_LEARNING_RATE, 0.0008, 0.0005, 0.0003, 0.0001, 5e-5]
     learning_rate = tf.train.piecewise_constant(
         global_index, boundaries, values)

@@ -34,14 +34,15 @@ _DATA_ROOT = {
         'rgb': '/data2/yunfeng/dataset/hmdb51/jpegs_256',
         'flow': '/data2/yunfeng/dataset/hmdb51/tvl1_flow/{:s}'
     },
-    'TCL': '/media/remus/datasets/TCL_Fall_Detection/avi/frames'
+    'TCL': '/media/remus/datasets/TCL_Fall_Detection/avi/frames',
+    'Fall_detection': '/media/remus/datasets/TCL_Fall_Detection/avi/frames',
 }
 
 # NOTE: Before running, change the path of checkpoints
 
 _CHECKPOINT_PATHS = {
     # 'rgb': './data/checkpoints/bw3_kin/TCL_rgb_0.988_model-48555',
-    'rgb': './data/checkpoints/bw_imagenet/TCL_rgb_0.980_model-38595',
+    'rgb': './kin_fall_detection_RGB_3set/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.812_model-9180',
     'flow': './data/checkpoints/flow_scratch/model.ckpt',
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
@@ -62,6 +63,7 @@ _SCOPE = {
 }
 
 _CLASS_NUM = {
+    'Fall_detection': 2,
     'TCL': 14,
     'ucf101': 101,
     'hmdb51': 51
@@ -99,7 +101,7 @@ def main(dataset, mode, split):
         info_bw, _ = bw_data.gen_test_list()
     if mode in ['rgb', 'mixed']:
         rgb_data = ActionDataset(
-            dataset, class_num, test_info_rgb, 'img_{:05d}{:s}.jpg', mode='rgb')
+            dataset, class_num, test_info_rgb, 'frame_{:04d}.png', mode='rgb')
         rgb_holder = tf.placeholder(
             tf.float32, [None, None, _FRAME_SIZE, _FRAME_SIZE, _CHANNEL['rgb']])
         info_rgb, _ = rgb_data.gen_test_list()
@@ -125,7 +127,7 @@ def main(dataset, mode, split):
     if mode in ['rgb', 'mixed']:
         with tf.variable_scope(_SCOPE['rgb']):
             rgb_model = i3d.InceptionI3d(
-                400, spatial_squeeze=True, final_endpoint='Logits')
+                600, spatial_squeeze=True, final_endpoint='Logits')
             rgb_logits, _ = rgb_model(
                 rgb_holder, is_training=False, dropout_keep_prob=1)
             rgb_logits_dropout = tf.nn.dropout(rgb_logits, 1)
