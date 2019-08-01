@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 from lib.video_3d import Video_3D
 
@@ -25,6 +27,9 @@ class Action_Dataset:
         self.index_in_epoch = end % self.size
         batch = []
         label = []
+
+        # start_time = time.time()
+
         if end >= self.size:
             self.epoch_completed += 1
             for i in range(start, self.size):
@@ -41,9 +46,14 @@ class Action_Dataset:
         else:
 
             for i in range(start, end):
+                print(self.videos[self.perm[i]].name)
                 batch.append(
                     self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment))
                 label.append(self.videos[self.perm[i]].label)
+
+        # duration = time.time() - start_time
+        # print("Time: ", duration)
+
         return np.stack(batch), np.stack(label)
 
 
