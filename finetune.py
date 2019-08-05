@@ -13,7 +13,7 @@ import tensorflow as tf
 import i3d
 from lib.action_dataset import Action_Dataset
 from lib.action_dataset import split_data
-np.set_printoptions(threshold=np.nan)
+# np.set_printoptions(threshold=np.nan)
 
 _BATCH_SIZE = 4
 _CLIP_SIZE = 64
@@ -33,7 +33,7 @@ _OUTPUT_STEP = 10
 _RUN_TEST_THRESH = 0.75
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.70
-_LOG_ROOT = 'kin_fall_detection_RGB_3set_proper'
+_LOG_ROOT = '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_detection_RGB_3set_proper_startExtended_bugfix'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -67,10 +67,10 @@ _CLASS_NUM = {
 }
 
 
-def _get_data_label_from_info(train_info_tensor, name, mode):
+def _get_data_label_from_info(train_info_tensor, name, mode, is_training=True):
     """ Wrapper for `tf.py_func`, get video clip and label from info list."""
     clip_holder, label_holder = tf.py_func(
-        process_video, [train_info_tensor, name, mode], [tf.float32, tf.int64])
+        process_video, [train_info_tensor, name, mode, is_training], [tf.float32, tf.int64])
     return clip_holder, label_holder
 
 
@@ -78,10 +78,10 @@ def process_video(data_info, name, mode, is_training=True):
     """ Get video clip and label from data info list."""
     data = Action_Dataset(name, mode, [data_info])
     if is_training:
-        clip_seq, label_seq = data.next_batch(1, _CLIP_SIZE)
+        clip_seq, label_seq = data.next_batch(1, _CLIP_SIZE, random_start=True)
     else:
         clip_seq, label_seq = data.next_batch(
-            1, _EACH_VIDEO_TEST_SIZE+1, shuffle=False, data_augment=False)
+            1, _EACH_VIDEO_TEST_SIZE+1, shuffle=False, data_augment=False, random_start=False)
 
     # print("input: ", label_seq.shape)
     # clip_seq = np.expand_dims(clip_seq, axis=-1)
@@ -127,7 +127,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
     train_info_dataset = train_info_dataset.shuffle(
         buffer_size=num_train_sample)
     train_dataset = train_info_dataset.map(lambda x: _get_data_label_from_info(
-        x, dataset, mode), num_parallel_calls=_NUM_PARALLEL_CALLS)
+        x, dataset, mode, is_training=True), num_parallel_calls=_NUM_PARALLEL_CALLS)
     train_dataset = train_dataset.repeat().batch(_BATCH_SIZE)
     train_dataset = train_dataset.prefetch(buffer_size=_PREFETCH_BUFFER_SIZE)
 
@@ -137,7 +137,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
         (test_info_tensor))
     # one element in this dataset is (single image_postprocess, single label)
     test_dataset = test_info_dataset.map(lambda x: _get_data_label_from_info(
-        x, dataset, mode), num_parallel_calls=_NUM_PARALLEL_CALLS)
+        x, dataset, mode, is_training=False), num_parallel_calls=_NUM_PARALLEL_CALLS)
     # one element in this dataset is (batch image_postprocess, batch label)
     test_dataset = test_dataset.batch(1).repeat()
     test_dataset = test_dataset.prefetch(buffer_size=_PREFETCH_BUFFER_SIZE)

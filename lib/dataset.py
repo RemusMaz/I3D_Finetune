@@ -49,8 +49,11 @@ class ActionDataset(Dataset):
         for i, video in enumerate(self.videos):
             # test_list.append(([i, 16, 1, sample, False, False],))
             if self.videos[i].label == 1:
-                print(self.videos[i].name, video.total_frame_num)
-            test_list.append(([i, 251, 1, sample, False, False],))
+                print("Fall: ", self.videos[i].name, video.total_frame_num)
+            # else:
+            #     print("ADL: ", self.videos[i].name, video.total_frame_num)
+
+            test_list.append(([i, 64, 1, sample, False, True],))
             name.append(video.name)
         return test_list, name
 

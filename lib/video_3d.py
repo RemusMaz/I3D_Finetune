@@ -44,10 +44,14 @@ class Video_3D:
         # img_format offer the standard name of pic
         self.img_format = img_format
 
-    def get_frames(self, frame_num, side_length=224, is_numpy=True, data_augment=False):
+    def get_frames(self, frame_num, side_length=224, is_numpy=True, data_augment=False, random_start=True):
         frames = list()
 
-        start = self.start_frame + random.randint(0, max(self.total_frame_num - frame_num, 0))
+        if random_start:
+            start = self.start_frame + random.randint(0, max(self.total_frame_num - frame_num, 0))
+        else:
+            start = self.start_frame
+
         # combine all frames
         # print(self.total_frame_num, self.path)
         for i in range(start, start + frame_num):

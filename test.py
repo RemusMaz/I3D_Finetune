@@ -35,7 +35,7 @@ _DATA_ROOT = {
         'flow': '/data2/yunfeng/dataset/hmdb51/tvl1_flow/{:s}'
     },
     'TCL': '/media/remus/datasets/TCL_Fall_Detection/avi/frames',
-    'Fall_detection': '/media/remus/datasets/TCL_Fall_Detection/avi/frames',
+    'Fall_detection': '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/datasets/Fall',
 }
 
 # NOTE: Before running, change the path of checkpoints
@@ -43,7 +43,7 @@ _DATA_ROOT = {
 _CHECKPOINT_PATHS = {
     # 'rgb': './data/checkpoints/bw3_kin/TCL_rgb_0.988_model-48555',
 
-    'rgb': './kin_fall_detection_RGB_3set_proper/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.935_model-102619',
+    'rgb': '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_detection_RGB_3set_proper_startExtended_2/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.934_model-102483',
     'flow': './data/checkpoints/flow_scratch/model.ckpt',
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
@@ -106,6 +106,7 @@ def main(dataset, mode, split):
         rgb_holder = tf.placeholder(
             tf.float32, [None, None, _FRAME_SIZE, _FRAME_SIZE, _CHANNEL['rgb']])
         info_rgb, _ = rgb_data.gen_test_list()
+
     # if mode in ['flow', 'mixed']:
     # flow_data = ActionDataset(
     #     dataset, class_num, test_info_flow, 'frame{:06d}{:s}.jpg', mode='flow')
@@ -135,6 +136,8 @@ def main(dataset, mode, split):
             rgb_fc_out = tf.layers.dense(
                 rgb_logits_dropout, _CLASS_NUM[dataset], use_bias=True)
             rgb_top_1_op = tf.nn.in_top_k(rgb_fc_out, label_holder, 1)
+
+
     # if mode in ['flow', 'mixed']:
     #     with tf.variable_scope(_SCOPE['flow']):
     #         flow_model = i3d.InceptionI3d(
@@ -179,7 +182,7 @@ def main(dataset, mode, split):
     # if mode == 'mixed':
     #     fc_out = _MIX_WEIGHT_OF_RGB * rgb_fc_out + _MIX_WEIGHT_OF_FLOW * flow_fc_out
     #     softmax = tf.nn.softmax(fc_out)
-    top_k_op = tf.nn.in_top_k(softmax, label_holder, 1)
+    top_k_op = rgb_top_1_op
 
     # GPU config
     # config = tf.ConfigProto()
@@ -248,16 +251,19 @@ def main(dataset, mode, split):
             bw_clip = np.expand_dims(bw_clip, axis=-1)
             input_bw = bw_clip[np.newaxis, :, :, :, :]
             video_name = bw_data.videos[i].name
+
         if mode in ['rgb', 'mixed']:
             rgb_clip, label = rgb_queue.feed_me()
             rgb_clip = 2 * (rgb_clip / 255) - 1
             input_rgb = rgb_clip[np.newaxis, :, :, :, :]
             video_name = rgb_data.videos[i].name
+
         # if mode in ['flow', 'mixed']:
         #     flow_clip, label = flow_queue.feed_me()
         #     flow_clip = 2*(flow_clip/255)-1
         #     input_flow = flow_clip[np.newaxis, :, :, :, :]
         #     video_name = flow_data.videos[i].name
+
         input_label = np.array([label]).reshape(-1)
 
         start = time.time()
