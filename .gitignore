@@ -9,3 +9,4 @@ model/*
 data/checkpoints/*
 __pycache__
 *.vscode
+/data/Fall_detection/run3_justFall/
