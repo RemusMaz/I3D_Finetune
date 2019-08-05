@@ -78,6 +78,7 @@ class Video_3D:
 
     def load_img(self, index):
         img_dir = self.path
+        # print(self.tag)
         if self.tag == 'bw':
             read_path = os.path.join(img_dir, self.img_format.format(index, ''))
             if os.path.exists(read_path):
@@ -87,7 +88,9 @@ class Video_3D:
 
             return [img]
         if self.tag == 'rgb':
+            # print("da")
             read_path = os.path.join(img_dir, self.img_format.format(index, ''))
+            # print(read_path)
             if os.path.exists(read_path):
                 img = Image.open(os.path.join(img_dir, self.img_format.format(index, ''))).convert('RGB')
             else:

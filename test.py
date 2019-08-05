@@ -35,14 +35,14 @@ _DATA_ROOT = {
         'flow': '/data2/yunfeng/dataset/hmdb51/tvl1_flow/{:s}'
     },
     'TCL': '/media/remus/datasets/TCL_Fall_Detection/avi/frames',
-    'Fall_detection': '/media/remus/datasets/TCL_Fall_Detection/avi/frames',
+    'Fall_detection': '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/datasets/Fall',
 }
 
 # NOTE: Before running, change the path of checkpoints
 
 _CHECKPOINT_PATHS = {
     # 'rgb': './data/checkpoints/bw3_kin/TCL_rgb_0.988_model-48555',
-    'rgb': './kin_fall_detection_RGB_3set/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.812_model-9180',
+    'rgb': '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_detection_RGB_3set_proper_startExtended_2/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.929_model-25090',
     'flow': './data/checkpoints/flow_scratch/model.ckpt',
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
