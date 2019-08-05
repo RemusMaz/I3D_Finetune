@@ -4,9 +4,21 @@ import random
 import numpy as np
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Writing frame index.")
+    parser.add_argument('--frames', default='../data/Fall_detection/rgb.txt', type=str)
+    parser.add_argument('--train', default='../data/Fall_detection/train.txt', type=str)
+    parser.add_argument('--val', default='../data/Fall_detection/val.txt', type=str)
+    parser.add_argument('--split_train', default='../data/Fall_detection/split_train.txt', type=str)
+    parser.add_argument('--split_val', default='../data/Fall_detection/split_val.txt', type=str)
+    args = parser.parse_args()
+    return args
+
+
 def parse_split(file, print_file):
     lines = file.readlines()
     frame_interval = 64
+    delta = 10
 
     for video_line in lines:
         path = video_line.strip()
@@ -35,17 +47,17 @@ def parse_split(file, print_file):
                 end_frame = start_fall
             else:
 
-                extension = frame_interval - (end_fall - start_fall + 1)
-                if extension <= 0:
-                    start_ext = max(1, start_fall - frame_interval / 2)
-                    end_ext = min(no_frames, end_fall + frame_interval / 2)
-                else:
-                    # extension = min(int((end_fall - start_fall) / 2), extension)
-                    start_ext = max(1, start_fall - extension)
-                    end_ext = min(no_frames, end_fall + extension)
+                # extension = frame_interval - (end_fall - start_fall + 1)
+                # if extension <= 0:
+                #     start_ext = max(1, start_fall - delta)
+                #     end_ext = min(no_frames, end_fall + frame_interval / 2 - delta)
+                # else:
+                #     # extension = min(int((end_fall - start_fall) / 2), extension)
+                #     start_ext = max(1, start_fall - delta)
+                #     end_ext = min(no_frames, end_fall + extension - delta)
 
-                start_frame = start_ext
-                end_frame = end_ext
+                start_frame = start_fall - delta
+                end_frame = end_fall
 
                 # start_frame = start_fall - frame_interval if start_fall >= frame_interval else 1
                 # end_frame = end_fall + frame_interval if end_fall + frame_interval <= no_frames else no_frames
@@ -64,17 +76,6 @@ def parse_split(file, print_file):
         line = video + " " + path + " " + str(start_frame) + " " + str(end_frame) + " " + str(clas_id) + "\n"
         frames.write(line)
         print_file.write(line)
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="Writing frame index.")
-    parser.add_argument('--frames', default='../data/Fall_detection/rgb.txt', type=str)
-    parser.add_argument('--train', default='../data/Fall_detection/train.txt', type=str)
-    parser.add_argument('--val', default='../data/Fall_detection/val.txt', type=str)
-    parser.add_argument('--split_train', default='../data/Fall_detection/split_train.txt', type=str)
-    parser.add_argument('--split_val', default='../data/Fall_detection/split_val.txt', type=str)
-    args = parser.parse_args()
-    return args
 
 
 if __name__ == '__main__':
