@@ -23,13 +23,13 @@ class ActionDataset(Dataset):
                 data_augment=False, random_start=False, side_length=224):
         '''
         train_list = []
-        video_num_per_epoch = math.ceil(self.size/batch_size) * batch_size
+        video_num_per_epoch = math.ceil(self.size / batch_size) * batch_size
         perm = np.arange(video_num_per_epoch) % self.size
         np.random.shuffle(perm)
         for j in range(0, video_num_per_epoch, batch_size):
             batch = []
             for k in range(batch_size):
-                idx = perm[j+k]
+                idx = perm[j + k]
                 info = [perm[idx], frame_num, 1, sample, True, True]
                 batch.append(info)
             train_list.append((batch,))
@@ -48,7 +48,9 @@ class ActionDataset(Dataset):
         name = []
         for i, video in enumerate(self.videos):
             # test_list.append(([i, 16, 1, sample, False, False],))
-            test_list.append(([i,251, 1, sample, False, False],))
+            if self.videos[i].label == 1:
+                print(self.videos[i].name, video.total_frame_num)
+            test_list.append(([i, 251, 1, sample, False, False],))
             name.append(video.name)
         return test_list, name
 

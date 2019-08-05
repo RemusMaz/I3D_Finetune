@@ -13,7 +13,7 @@ import tensorflow as tf
 import i3d
 from lib.action_dataset import Action_Dataset
 from lib.action_dataset import split_data
-# np.set_printoptions(threshold=np.nan)
+np.set_printoptions(threshold=np.nan)
 
 _BATCH_SIZE = 4
 _CLIP_SIZE = 64
@@ -33,7 +33,7 @@ _OUTPUT_STEP = 10
 _RUN_TEST_THRESH = 0.75
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.70
-_LOG_ROOT = '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_detection_RGB_3set_proper_startExtended_2'
+_LOG_ROOT = 'kin_fall_detection_RGB_3set_proper'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -43,7 +43,8 @@ _CHECKPOINT_PATHS = {
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
     # 'bw_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'bw': './data/checkpoints/bw_scratch/TCL_bw_0.902_model-25647',
-    'fall': '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_detection_RGB_3set_proper_startExtended/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.893_model-6369'
+
+
 }
 
 _CHANNEL = {
@@ -196,11 +197,11 @@ def main(dataset='ucf101', mode='rgb', split=1):
     tf.summary.scalar('loss_weight', loss_weight)
     tf.summary.scalar('total_loss', total_loss)
 
-    ckpt_reader = tf.train.NewCheckpointReader(_CHECKPOINT_PATHS['fall'])#train_data.mode + "_kinetics"])
+    ckpt_reader = tf.train.NewCheckpointReader(_CHECKPOINT_PATHS[train_data.mode + "_kinetics"])
     ckpt_vars_to_shape_map = ckpt_reader.get_variable_to_shape_map()
 
-    # saver = tf.train.Saver(var_list=variable_map, reshape=True)
-    saver = tf.train.Saver(reshape=True)
+    saver = tf.train.Saver(var_list=variable_map, reshape=True)
+    # saver = tf.train.Saver(reshape=True)
     saver2 = tf.train.Saver(max_to_keep=_SAVER_MAX_TO_KEEP)
     # Specific Hyperparams
     # steps for training: the number of steps on batch per epoch
@@ -228,7 +229,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
     train_writer = tf.summary.FileWriter(log_dir, sess.graph)
     sess.run(tf.global_variables_initializer())
     sess.run(train_init_op)
-    saver.restore(sess, _CHECKPOINT_PATHS['fall'])#train_data.mode + "_kinetics"])
+    saver.restore(sess, _CHECKPOINT_PATHS[train_data.mode + "_kinetics"])
 
     print('----Here we start!----')
     # print('Output wirtes to ' + log_dir)

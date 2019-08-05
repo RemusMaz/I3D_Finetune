@@ -35,14 +35,15 @@ _DATA_ROOT = {
         'flow': '/data2/yunfeng/dataset/hmdb51/tvl1_flow/{:s}'
     },
     'TCL': '/media/remus/datasets/TCL_Fall_Detection/avi/frames',
-    'Fall_detection': '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/datasets/Fall',
+    'Fall_detection': '/media/remus/datasets/TCL_Fall_Detection/avi/frames',
 }
 
 # NOTE: Before running, change the path of checkpoints
 
 _CHECKPOINT_PATHS = {
     # 'rgb': './data/checkpoints/bw3_kin/TCL_rgb_0.988_model-48555',
-    'rgb': '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_detection_RGB_3set_proper_startExtended_2/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.929_model-25090',
+
+    'rgb': './kin_fall_detection_RGB_3set_proper/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.935_model-102619',
     'flow': './data/checkpoints/flow_scratch/model.ckpt',
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
@@ -225,6 +226,10 @@ def main(dataset, mode, split):
     print('Output wirtes to ' + log_dir)
     true_count2 = 0
     true_count = 0
+    tn = 0
+    tp = 0
+    fp = 0
+    fn = 0
     video_size = len(test_info_rgb)
     error_record = open(os.path.join(
         log_dir, 'error_record_' + mode + '.txt'), 'w')
@@ -304,6 +309,19 @@ def main(dataset, mode, split):
         #        print(trans_label(np.argmax(predictions, axis=1)[0], label_map))
         # print(np.argmax(label))
         # print(trans_label(np.argmax(label), label_map))
+        answer = np.argmax(predictions, axis=1)[0]
+        # print(label_map[input_label[0]], answer)
+        if label_map[input_label[0]] == label_map[0]:
+            if tmp == 0:
+                fn += 1
+            else:
+                tn += 1
+        else:
+            if tmp == 0:
+                fp += 1
+            else:
+                tp += 1
+
 
         if tmp == 0:
             wrong_answer = np.argmax(predictions, axis=1)[0]
@@ -326,10 +344,15 @@ def main(dataset, mode, split):
     print("Avg. time:", sum(inference_time) / len(inference_time))
 
     error_record.close()
-    accuracy = true_count / video_size
-    accuracy2 = true_count2 / video_size
+
+    print("tp, fp, tn, fn:", tp, fp, tn, fn)
+    accuracy = (tp + tn) / (tp + tn + fp + fn)
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
     print('test accuracy: %.4f' % (accuracy))
-    print('test accuracy2: %.4f' % (accuracy2))
+    print('test Precision: %.4f' % (tp / (tp + fp)))
+    print('test Recall: %.4f' % (tp / (tp + fn)))
+    print('test F1: %.4f' % (2 * precision * recall / (precision + recall)))
     logging.info('test accuracy: %.4f' % (accuracy))
     if mode in ['bw']:
         np.save(os.path.join(log_dir, 'obj_{}_bw_fc_{}.npy').format(
