@@ -3,9 +3,9 @@ import cv2
 import skvideo.io
 
 if __name__ == '__main__':
-    data_root = os.path.join('/media/remus/datasets/Fall/Fall_detection')
+    data_root = os.path.join('/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/datasets/Fall_detection_Antoine')
 
-    for room in os.listdir(data_root):
+    for room in sorted(os.listdir(data_root)):
 
         videos_root = os.path.join(data_root, room, "Videos")
         videos_list = os.listdir(videos_root)

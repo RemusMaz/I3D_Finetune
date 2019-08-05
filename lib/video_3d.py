@@ -44,10 +44,14 @@ class Video_3D:
         # img_format offer the standard name of pic
         self.img_format = img_format
 
-    def get_frames(self, frame_num, side_length=224, is_numpy=True, data_augment=False):
+    def get_frames(self, frame_num, side_length=224, is_numpy=True, data_augment=False, random_start=True):
         frames = list()
 
-        start = self.start_frame + random.randint(0, max(self.total_frame_num - frame_num, 0))
+        if random_start:
+            start = self.start_frame + random.randint(0, max(self.total_frame_num - frame_num, 0))
+        else:
+            start = self.start_frame
+
         # combine all frames
         # print(self.total_frame_num, self.path)
         for i in range(start, start + frame_num):
@@ -78,6 +82,7 @@ class Video_3D:
 
     def load_img(self, index):
         img_dir = self.path
+        # print(self.tag)
         if self.tag == 'bw':
             read_path = os.path.join(img_dir, self.img_format.format(index, ''))
             if os.path.exists(read_path):
@@ -87,7 +92,9 @@ class Video_3D:
 
             return [img]
         if self.tag == 'rgb':
+            # print("da")
             read_path = os.path.join(img_dir, self.img_format.format(index, ''))
+            # print(read_path)
             if os.path.exists(read_path):
                 img = Image.open(os.path.join(img_dir, self.img_format.format(index, ''))).convert('RGB')
             else:
