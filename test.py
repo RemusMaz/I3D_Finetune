@@ -311,14 +311,14 @@ def main(dataset, mode, split):
         # print(trans_label(np.argmax(label), label_map))
         answer = np.argmax(predictions, axis=1)[0]
         # print(label_map[input_label[0]], answer)
-        if label_map[input_label[0]] == label_map[0]:
+        if label_map[input_label[0]] == label_map[0]: #NotFall
             if tmp == 0:
-                fn += 1
+                fp += 1
             else:
                 tn += 1
         else:
             if tmp == 0:
-                fp += 1
+                fn += 1
             else:
                 tp += 1
 
