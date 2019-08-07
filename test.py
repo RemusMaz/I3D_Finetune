@@ -43,7 +43,7 @@ _DATA_ROOT = {
 _CHECKPOINT_PATHS = {
     # 'rgb': './data/checkpoints/bw3_kin/TCL_rgb_0.988_model-48555',
 
-    'rgb': '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_detection_RGB_3set_proper_startExtended_2/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.934_model-102483',
+    'rgb': '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_detection_RGB_3set_proper_bugfix_/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.900_model-12090',
     'flow': './data/checkpoints/flow_scratch/model.ckpt',
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
@@ -353,6 +353,7 @@ def main(dataset, mode, split):
 
     print("tp, fp, tn, fn:", tp, fp, tn, fn)
     accuracy = (tp + tn) / (tp + tn + fp + fn)
+    accuracy = true_count / video_size
     precision = tp / (tp + fp)
     recall = tp / (tp + fn)
     print('test accuracy: %.4f' % (accuracy))

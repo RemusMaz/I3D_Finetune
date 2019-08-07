@@ -33,7 +33,7 @@ _OUTPUT_STEP = 10
 _RUN_TEST_THRESH = 0.75
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.70
-_LOG_ROOT = '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_detection_RGB_3set_proper_startExtended_bugfix'
+_LOG_ROOT = '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_prediction_RGB_3set'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',

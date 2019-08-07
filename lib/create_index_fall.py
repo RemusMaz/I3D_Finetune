@@ -1,7 +1,7 @@
 import os
 import argparse
 
-LEFT_EXTENSION = True
+LEFT_EXTENSION = False
 RIGHT_EXTENSION = False
 
 def parse_split(file, print_file):
@@ -53,13 +53,14 @@ def parse_split(file, print_file):
                 if RIGHT_EXTENSION:
                     end_frame = end_ext
 
+            # start_frame -= 10
             if start_frame > frame_interval:
                 line = video + "_left " + path + " " + str(1) + " " + str(start_frame - 1) + " " + str(0) + "\n"
                 frames.write(line)
                 print_file.write(line)
 
-            if max(end_frame, end_ext) < no_frames - frame_interval:
-                line = video + "_right " + path + " " + str(max(end_frame, end_ext) + 1) + " " + str(
+            if end_frame < no_frames - frame_interval:
+                line = video + "_right " + path + " " + str(end_frame + 1) + " " + str(
                     no_frames) + " " + str(0) + "\n"
                 frames.write(line)
                 print_file.write(line)

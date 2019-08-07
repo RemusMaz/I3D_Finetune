@@ -53,7 +53,7 @@ class ActionDataset(Dataset):
             # else:
             #     print("ADL: ", self.videos[i].name, video.total_frame_num)
 
-            test_list.append(([i, 64, 1, sample, False, True],))
+            test_list.append(([i, 250, 1, sample, False, False],))
             name.append(video.name)
         return test_list, name
 
