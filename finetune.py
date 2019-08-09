@@ -197,8 +197,8 @@ def main(dataset='ucf101', mode='rgb', split=1):
     tf.summary.scalar('loss_weight', loss_weight)
     tf.summary.scalar('total_loss', total_loss)
 
-    # ckpt_reader = tf.train.NewCheckpointReader(_CHECKPOINT_PATHS[train_data.mode + "_kinetics"])
-    # ckpt_vars_to_shape_map = ckpt_reader.get_variable_to_shape_map()
+    ckpt_reader = tf.train.NewCheckpointReader(_CHECKPOINT_PATHS[train_data.mode + "_kinetics"])
+    ckpt_vars_to_shape_map = ckpt_reader.get_variable_to_shape_map()
 
     saver = tf.train.Saver(var_list=variable_map, reshape=True)
     # saver = tf.train.Saver(reshape=True)

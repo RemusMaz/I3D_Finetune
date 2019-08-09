@@ -43,7 +43,7 @@ _DATA_ROOT = {
 _CHECKPOINT_PATHS = {
     # 'rgb': './data/checkpoints/bw3_kin/TCL_rgb_0.988_model-48555',
 
-    'rgb': '/home/remusm/projects/I3D_Finetune/experiments_test_bug_fix/kin_fall_prediction_RGB_3set_prediction+16f/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.841_model-15170',
+    'rgb': '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_detection_RGB_3set_proper_bugfix_/finetune-Fall_detection-rgb-1/Fall_detection_rgb_0.900_model-12090',
     'flow': './data/checkpoints/flow_scratch/model.ckpt',
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
