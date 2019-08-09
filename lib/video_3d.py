@@ -53,11 +53,12 @@ class Video_3D:
             start = self.start_frame
 
         # combine all frames
-        # print(self.total_frame_num, self.path)
+        print(self.total_frame_num, self.path)
         for i in range(start, start + frame_num):
+
+            frames.extend(self.load_img((i - 1) % self.total_frame_num + self.start_frame))
             # print(self.img_format.format(i, ''))
 
-            frames.extend(self.load_img((i - 1) % self.total_frame_num + 1))
 
         if frames is []:
             return
@@ -94,7 +95,7 @@ class Video_3D:
         if self.tag == 'rgb':
             # print("da")
             read_path = os.path.join(img_dir, self.img_format.format(index, ''))
-            # print(read_path)
+            print(read_path)
             if os.path.exists(read_path):
                 img = Image.open(os.path.join(img_dir, self.img_format.format(index, ''))).convert('RGB')
             else:

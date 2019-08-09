@@ -33,7 +33,7 @@ _OUTPUT_STEP = 10
 _RUN_TEST_THRESH = 0.75
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.70
-_LOG_ROOT = '/media/andrettin/27d6e7a9-9747-4a23-b788-27ac273d328b/ACTION_RECOGNITION/I3D/checkpoints/kin_fall_detection_RGB_3set_proper_startExtended_bugfix'
+_LOG_ROOT = './experiments_test_bug_fix/test'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -197,8 +197,8 @@ def main(dataset='ucf101', mode='rgb', split=1):
     tf.summary.scalar('loss_weight', loss_weight)
     tf.summary.scalar('total_loss', total_loss)
 
-    ckpt_reader = tf.train.NewCheckpointReader(_CHECKPOINT_PATHS[train_data.mode + "_kinetics"])
-    ckpt_vars_to_shape_map = ckpt_reader.get_variable_to_shape_map()
+    # ckpt_reader = tf.train.NewCheckpointReader(_CHECKPOINT_PATHS[train_data.mode + "_kinetics"])
+    # ckpt_vars_to_shape_map = ckpt_reader.get_variable_to_shape_map()
 
     saver = tf.train.Saver(var_list=variable_map, reshape=True)
     # saver = tf.train.Saver(reshape=True)

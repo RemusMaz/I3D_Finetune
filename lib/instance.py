@@ -45,9 +45,10 @@ class Video3D(Video):
         start = self.start
         if random_start:
             start = start + np.random.randint(max(self.total_frame_num-(frame_num-1)*sample, 1))
+
         frames = []
         for i in range(start, start + frame_num * sample, sample):
-            frames.extend(self.load_img(i % self.total_frame_num + 1))
+            frames.extend(self.load_img((i - 1) % self.total_frame_num + self.start))
         frames = transform_data(frames, crop_size=side_length, random_crop=data_augment, random_flip=data_augment)
         frames_np = []
         if self.tag == 'bw':

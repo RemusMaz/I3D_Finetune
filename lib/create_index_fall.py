@@ -1,13 +1,14 @@
 import os
 import argparse
 
-LEFT_EXTENSION = True
+LEFT_EXTENSION = False
 RIGHT_EXTENSION = False
+PREDICTION = True
+
 
 def parse_split(file, print_file):
     lines = file.readlines()
     frame_interval = 64
-    prediction = True
 
     for video_line in lines:
         path = video_line.strip()
@@ -43,9 +44,9 @@ def parse_split(file, print_file):
                 start_ext = max(1, start_fall - extension)
                 end_ext = min(no_frames, end_fall + extension)
 
-            if prediction:
+            if PREDICTION:
                 start_frame = max(1, start_fall - frame_interval)
-                end_frame = start_fall
+                end_frame = min(end_fall, no_frames)
             else:
                 if LEFT_EXTENSION:
                     start_frame = start_ext
@@ -58,8 +59,8 @@ def parse_split(file, print_file):
                 frames.write(line)
                 print_file.write(line)
 
-            if max(end_frame, end_ext) < no_frames - frame_interval:
-                line = video + "_right " + path + " " + str(max(end_frame, end_ext) + 1) + " " + str(
+            if max(end_frame, end_fall) < no_frames - frame_interval:
+                line = video + "_right " + path + " " + str(max(end_frame, end_fall) + 1) + " " + str(
                     no_frames) + " " + str(0) + "\n"
                 frames.write(line)
                 print_file.write(line)
