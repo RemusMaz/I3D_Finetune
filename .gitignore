@@ -9,4 +9,4 @@ model/*
 data/checkpoints/*
 __pycache__
 *.vscode
-/data/Fall_detection
+/data/Fall_detection/

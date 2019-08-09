@@ -34,39 +34,25 @@ class Action_Dataset:
             self.epoch_completed += 1
             for i in range(start, self.size):
                 # construct batch from start to the size
-                if random_start is False and self.videos[self.perm[i]].label == 1:
-                    batch.append(
-                        self.videos[self.perm[i]].get_frames(64, data_augment=data_augment,
-                                                             random_start=random_start))
-                else:
-                    batch.append(
-                        self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment,
-                                                             random_start=random_start))
+                batch.append(
+                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment,
+                                                         random_start=random_start))
                 label.append(self.videos[self.perm[i]].label)
             if shuffle:
                 np.random.shuffle(self.perm)
             for i in range(0, self.index_in_epoch):
-                if random_start is False and self.videos[self.perm[i]].label == 1:
-                    batch.append(
-                        self.videos[self.perm[i]].get_frames(64, data_augment=data_augment,
-                                                             random_start=random_start))
-                else:
-                    batch.append(
-                        self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment,
-                                                             random_start=random_start))
+                batch.append(
+                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment,
+                                                         random_start=random_start))
                 label.append(self.videos[self.perm[i]].label)
         else:
 
             for i in range(start, end):
                 print(self.videos[self.perm[i]].name)
-                if random_start is False and self.videos[self.perm[i]].label == 1:
-                    batch.append(
-                        self.videos[self.perm[i]].get_frames(64, data_augment=data_augment,
-                                                             random_start=random_start))
-                else:
-                    batch.append(
-                        self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment,
-                                                             random_start=random_start))
+
+                batch.append(
+                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment,
+                                                         random_start=random_start))
                 label.append(self.videos[self.perm[i]].label)
 
         # duration = time.time() - start_time
