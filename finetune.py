@@ -33,7 +33,7 @@ _OUTPUT_STEP = 10
 _RUN_TEST_THRESH = 0.75
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.70
-_LOG_ROOT = './experiments_test_bug_fix/2nd_bug'
+_LOG_ROOT = './experiments_test_bug_fix/prediction_without_fall_segment'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -106,8 +106,8 @@ def main(dataset='ucf101', mode='rgb', split=1):
         os.path.join('./data', dataset, 'val.txt'))
 #        os.path.join('/data1/yunfeng/i3d_test/data', dataset, mode+'.txt'),
 #        os.path.join('/data1/yunfeng/i3d_test/data', dataset, 'testlist%02d' % split+'.txt'))
-    train_data = Action_Dataset(dataset, mode, train_info)
-    test_data = Action_Dataset(dataset, mode, test_info)
+    train_data = Action_Dataset(dataset, mode, train_info, is_train = True)
+    test_data = Action_Dataset(dataset, mode, test_info,  is_train = False)
 
     num_train_sample = len(train_info)
     # Every element in train_info is shown as below:

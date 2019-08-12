@@ -12,7 +12,7 @@ from lib.data_augment import transform_data
 
 
 class Video_3D:
-    def __init__(self, info_list, tag='rgb', img_format='frame_{:04d}{}.png'):
+    def __init__(self, info_list, tag='rgb', img_format='frame_{:04d}{}.png', is_train=True):
         '''
             info_list: [name, path, total_frame, label]
             tag: 'rgb'(default) or 'flow'
@@ -40,6 +40,9 @@ class Video_3D:
             self.label = info_list[4]
         else:
             self.label = int(info_list[4])
+
+        if not is_train and self.label == 1:
+            self.end_frame = self.start_frame + 64
         self.tag = tag
         # img_format offer the standard name of pic
         self.img_format = img_format
@@ -55,10 +58,8 @@ class Video_3D:
         # combine all frames
         # print(self.total_frame_num, self.path)
         for i in range(start, start + frame_num):
-
             frames.extend(self.load_img((i - 1) % self.total_frame_num + self.start_frame))
             # print(self.img_format.format(i, ''))
-
 
         if frames is []:
             return

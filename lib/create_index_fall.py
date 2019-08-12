@@ -6,7 +6,7 @@ RIGHT_EXTENSION = False
 PREDICTION = True
 
 
-def parse_split(file, print_file):
+def parse_split(file, print_file, is_train = True):
     lines = file.readlines()
     frame_interval = 64
 
@@ -32,7 +32,7 @@ def parse_split(file, print_file):
         else:
             clas_id = 1
 
-            start_frame = start_fall
+            start_frame = start_fall - 10
             end_frame = end_fall
 
             extension = frame_interval - (end_fall - start_fall + 1)
@@ -46,7 +46,7 @@ def parse_split(file, print_file):
 
             if PREDICTION:
                 start_frame = max(1, start_fall - frame_interval)
-                end_frame = min(end_fall, no_frames)
+                end_frame = min(start_fall, no_frames)
             else:
                 if LEFT_EXTENSION:
                     start_frame = start_ext
@@ -67,6 +67,8 @@ def parse_split(file, print_file):
 
         line = video + " " + path + " " + str(start_frame) + " " + str(end_frame) + " " + str(clas_id) + "\n"
         frames.write(line)
+        # if clas_id == 1 and not is_train:
+        #     line = video + " " + path + " " + str(start_frame) + " " + str(start_fall) + " " + str(clas_id) + "\n"
         print_file.write(line)
 
 
@@ -91,8 +93,8 @@ if __name__ == '__main__':
     train = open(args.train, "w")
     val = open(args.val, "w")
 
-    parse_split(split_train, train)
-    parse_split(split_val, val)
+    parse_split(split_train, train, is_train=True)
+    parse_split(split_val, val, is_train=False)
 
     frames.close()
     train.close()
