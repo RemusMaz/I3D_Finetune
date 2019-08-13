@@ -5,10 +5,10 @@ from lib.video_3d import Video_3D
 
 
 class Action_Dataset:
-    def __init__(self, name, mode, video_info):
+    def __init__(self, name, mode, video_info, is_train=True):
         self.name = name
         self.mode = mode
-        self.videos = [Video_3D(x, self.mode) for x in video_info]
+        self.videos = [Video_3D(x, self.mode, is_train = is_train) for x in video_info]
         # the size is maybe the number of videos
         self.size = len(self.videos)
         self.epoch_completed = 0
@@ -35,15 +35,13 @@ class Action_Dataset:
             for i in range(start, self.size):
                 # construct batch from start to the size
                 batch.append(
-                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment,
-                                                         random_start=random_start))
+                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment, random_start=random_start))
                 label.append(self.videos[self.perm[i]].label)
             if shuffle:
                 np.random.shuffle(self.perm)
             for i in range(0, self.index_in_epoch):
                 batch.append(
-                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment,
-                                                         random_start=random_start))
+                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment, random_start=random_start))
                 label.append(self.videos[self.perm[i]].label)
         else:
 
@@ -51,8 +49,7 @@ class Action_Dataset:
                 print(self.videos[self.perm[i]].name)
 
                 batch.append(
-                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment,
-                                                         random_start=random_start))
+                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment, random_start=random_start))
                 label.append(self.videos[self.perm[i]].label)
 
         # duration = time.time() - start_time
@@ -69,14 +66,14 @@ def split_data(data_info, test_split):
     test_info = list()
     # extract the specific video name,and plus a document name behind,the result is such v_ApplyEyeMakeup_g01_c01
     for line in f2.readlines():
-        test.append(line.strip())
+        test.append(line.strip().split(" ")[0])
         test_info.append(line.strip().split(" "))
 
     # if rgb's doc name is in testlist,then append in test_info,if not, append in train
     # for example, info is
     # v_ApplyEyeMakeup_g01_c01,/data4/zhouhao/dataset/ucf101/jpegs_256/v_ApplyEyeMakeup_g01_c01,165,0
     for line in f1.readlines():
-        info = line.strip()
+        info = line.strip().split(" ")[0]
 
         if info in test:
             continue

@@ -32,21 +32,29 @@ def get_info(name, root, mode='rgb', split=1):
     data_dir = './data/'+name+'/'+mode+'.txt'
     test_split = './data/'+name+'/val.txt'
     f_1 = open(data_dir, 'r')
-    test = [x.strip() for x in open(test_split, 'r').readlines()]
+
     train_info = []
     test_info = []
-    for line in f_1.readlines():
-        data = line.strip()
+    test = [x.strip().split(" ")[0] for x in open(test_split, 'r').readlines()]
+
+    for line in open(test_split, 'r').readlines():
         line = line.strip().split(' ')
-        # line[0].pop(1)
         info = {'name': line[0],
                 'path': os.path.join(line[1]),
                 'start': int(line[2]),
                 'end': int(line[3]),
                 'label': int(line[4])}
-        if data in test:
-            test_info.append(info)
-        else:
+        test_info.append(info)
+
+    for line in f_1.readlines():
+        data = line.strip().split(" ")[0]
+        line = line.strip().split(' ')
+        info = {'name': line[0],
+                'path': os.path.join(line[1]),
+                'start': int(line[2]),
+                'end': int(line[3]),
+                'label': int(line[4])}
+        if data not in test:
             train_info.append(info)
     f_1.close()
     return train_info, test_info

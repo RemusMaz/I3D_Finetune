@@ -40,6 +40,7 @@ class Video_3D:
             self.label = info_list[4]
         else:
             self.label = int(info_list[4])
+
         self.tag = tag
         # img_format offer the standard name of pic
         self.img_format = img_format
@@ -57,7 +58,6 @@ class Video_3D:
         for i in range(0, frame_num * sample, sample):
             frames.extend(self.load_img(i % self.total_frame_num + start))
             # print(self.img_format.format(i, ''))
-
 
         if frames is []:
             return

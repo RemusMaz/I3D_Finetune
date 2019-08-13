@@ -108,8 +108,8 @@ def main(dataset='ucf101', mode='rgb', split=1):
         os.path.join('./data', dataset, 'val.txt'))
 #        os.path.join('/data1/yunfeng/i3d_test/data', dataset, mode+'.txt'),
 #        os.path.join('/data1/yunfeng/i3d_test/data', dataset, 'testlist%02d' % split+'.txt'))
-    train_data = Action_Dataset(dataset, mode, train_info)
-    test_data = Action_Dataset(dataset, mode, test_info)
+    train_data = Action_Dataset(dataset, mode, train_info, is_train = True)
+    test_data = Action_Dataset(dataset, mode, test_info,  is_train = False)
 
     num_train_sample = len(train_info)
     # Every element in train_info is shown as below:
