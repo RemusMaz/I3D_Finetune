@@ -12,7 +12,7 @@ from lib.data_augment import transform_data
 
 
 class Video_3D:
-    def __init__(self, info_list, tag='rgb', img_format='frame_{:04d}{}.png'):
+    def __init__(self, info_list, tag='rgb', img_format='{:06d}{}.png'):
         '''
             info_list: [name, path, total_frame, label]
             tag: 'rgb'(default) or 'flow'
@@ -44,19 +44,18 @@ class Video_3D:
         # img_format offer the standard name of pic
         self.img_format = img_format
 
-    def get_frames(self, frame_num, side_length=224, is_numpy=True, data_augment=False, random_start=True):
+    def get_frames(self, frame_num, side_length=224, sample=1,  is_numpy=True, data_augment=False, random_start=True):
         frames = list()
 
         if random_start:
-            start = self.start_frame + random.randint(0, max(self.total_frame_num - frame_num, 0))
+            start = self.start_frame + random.randint(0, max(self.total_frame_num - frame_num * sample, 0))
         else:
             start = self.start_frame
 
         # combine all frames
         # print(self.total_frame_num, self.path)
-        for i in range(start, start + frame_num):
-
-            frames.extend(self.load_img((i - 1) % self.total_frame_num + self.start_frame))
+        for i in range(0, frame_num * sample, sample):
+            frames.extend(self.load_img(i % self.total_frame_num + start))
             # print(self.img_format.format(i, ''))
 
 

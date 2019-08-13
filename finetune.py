@@ -28,12 +28,12 @@ _SAVER_MAX_TO_KEEP = 10
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
 _MOMENTUM = 0.9
 _DROPOUT = 0.36
-_OUTPUT_STEP = 10
+_OUTPUT_STEP = 1
 # When the accuracy on training data higher than this value, run testing phase
 _RUN_TEST_THRESH = 0.75
 # If the accuracy on testing data higher than this value, save the model
-_SAVE_MODEL_THRESH = 0.70
-_LOG_ROOT = './experiments_test_bug_fix/2nd_bug'
+_SAVE_MODEL_THRESH = 0.25
+_LOG_ROOT = './rr_experiments/thermal/120819'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -60,6 +60,8 @@ _SCOPE = {
 }
 
 _CLASS_NUM = {
+    'rr_thermal': 4,
+    'rr_rgb': 4,
     'Fall_detection': 2,
     'TCL': 14,
     'ucf101': 101,
@@ -212,7 +214,7 @@ def main(dataset='ucf101', mode='rgb', split=1):
     global_index = tf.Variable(0, trainable=False)
 
     # Set learning rate schedule by hand, also you can use an auto way
-    boundaries = [5000, 10000, 15000, 20000, 25000]
+    boundaries = [500, 1000, 1500, 2000, 2500]
     values = [_LEARNING_RATE, 0.0008, 0.0005, 0.0003, 0.0001, 5e-5]
     learning_rate = tf.train.piecewise_constant(
         global_index, boundaries, values)

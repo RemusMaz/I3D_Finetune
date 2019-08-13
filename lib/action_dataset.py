@@ -70,6 +70,7 @@ def split_data(data_info, test_split):
     # extract the specific video name,and plus a document name behind,the result is such v_ApplyEyeMakeup_g01_c01
     for line in f2.readlines():
         test.append(line.strip())
+        test_info.append(line.strip().split(" "))
 
     # if rgb's doc name is in testlist,then append in test_info,if not, append in train
     # for example, info is
@@ -78,7 +79,8 @@ def split_data(data_info, test_split):
         info = line.strip()
 
         if info in test:
-            test_info.append(line.strip().split(" "))
+            continue
+            # test_info.append(line.strip().split(" "))
         else:
             train_info.append(line.strip().split(" "))
     f1.close()
